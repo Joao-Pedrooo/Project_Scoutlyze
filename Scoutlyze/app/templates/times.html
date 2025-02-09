@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Times{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Cadastro de Times</h1>
+
+    <!-- Formulário de Cadastro -->
+    <form action="/api/times/" method="post" class="mb-4">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome do Time</label>
+            <input type="text" id="nome" name="nome" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoria</label>
+            <select id="categoria" name="categoria" class="form-select" required>
+                {% for cat in categorias %}
+                <option value="{{ cat.value }}">{{ cat.value|capitalize }} - {{ cat.description }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-plus-circle"></i> Cadastrar
+        </button>
+    </form>
+
+    <!-- Lista de Times em Cards -->
+    <h2 class="text-center mt-5">Times Cadastrados</h2>
+    <div class="row gy-4">
+        {% for time in times %}
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="fas fa-users"></i> {{ time.nome }}
+                    </h5>
+                    <p class="card-text">
+                        <strong>Categoria:</strong> {{ time.categoria|capitalize }}<br />
+                        <strong>ID:</strong> {{ time.time_id }}
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="/api/times/{{ time.time_id }}/jogadores" class="btn btn-info btn-sm">
+                            <i class="fas fa-users"></i> Ver Jogadores
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="deletarTime('{{ time.time_id }}')">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <p>Nenhum time cadastrado.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    async function deletarTime(timeId) {
+        if (confirm("Tem certeza que deseja excluir este time?")) {
+            try {
+                const response = await fetch(`/api/times/${timeId}`, {
+                    method: "DELETE",
+                });
+                if (response.ok) {
+                    alert("Time deletado com sucesso!");
+                    location.reload();
+                } else {
+                    alert("Erro ao excluir o time.");
+                }
+            } catch (error) {
+                alert("Erro ao excluir o time: " + error.message);
+            }
+        }
+    }
+</script>
+
+<!-- Adicionando Font Awesome para ícones -->
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{% endblock %}

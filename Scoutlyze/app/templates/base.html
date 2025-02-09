@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Scoutlyze{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="16x16"  href="/static/images/favicon-16x16.png">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Scoutlyze</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Cadastro Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCadastro" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Cadastro
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownCadastro">
+                            <li><a class="dropdown-item" href="/api/times">Times</a></li>
+                            <li><a class="dropdown-item" href="/api/jogadores">Jogadores</a></li>
+                            <li><a class="dropdown-item" href="/api/partidas">Partidas</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Coleta Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownColeta" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Coleta
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownColeta">
+                            <li><a class="dropdown-item" href="/api/jogo_ao_vivo">Jogo ao Vivo</a></li>
+                            <li><a class="dropdown-item" href="/api/finalizazcoes">Finalizações</a></li>
+                            <li><a class="dropdown-item" href="/api/acoes_defencivas">Ações Defensivas</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Análise Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAnalise" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Análise
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownAnalise">
+                            <li><a class="dropdown-item" href="/api/dasboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/api/jogadores">Jogadores</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}
+        <!-- Conteúdo será inserido aqui -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>© 2025 Scoutlyze. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

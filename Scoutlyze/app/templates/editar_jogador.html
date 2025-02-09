@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Jogador{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">Editar Jogador</h1>
+  <form action="/api/jogadores/editar/{{ jogador.jogador_id }}" method="post" class="mb-4">
+    <div class="mb-3">
+      <label for="nome" class="form-label">Nome do Jogador</label>
+      <input type="text" id="nome" name="nome" class="form-control" value="{{ jogador.nome }}" required />
+    </div>
+    <div class="mb-3">
+      <label for="numero" class="form-label">Número da Camisa</label>
+      <!-- Converte para int para remover zeros à esquerda -->
+      <input type="number" id="numero" name="numero" class="form-control" value="{{ jogador.numero_camisa | int }}" required min="0" max="99" />
+    </div>
+    <div class="mb-3">
+      <label for="posicao" class="form-label">Posição</label>
+      <select id="posicao" name="posicao" class="form-select" required>
+        <option value="goleiro" {% if jogador.posicao == "goleiro" %}selected{% endif %}>Goleiro</option>
+        <option value="fixo" {% if jogador.posicao == "fixo" %}selected{% endif %}>Fixo</option>
+        <option value="ala" {% if jogador.posicao == "ala" %}selected{% endif %}>Ala</option>
+        <option value="pivo" {% if jogador.posicao == "pivo" %}selected{% endif %}>Pivô</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="pe_dominante" class="form-label">Pé Dominante</label>
+      <select id="pe_dominante" name="pe_dominante" class="form-select" required>
+        <option value="direito" {% if jogador.pe_dominante == "direito" %}selected{% endif %}>Direito</option>
+        <option value="esquerdo" {% if jogador.pe_dominante == "esquerdo" %}selected{% endif %}>Esquerdo</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="time_id" class="form-label">Time</label>
+      <select id="time_id" name="time_id" class="form-select" required>
+        {% for time in times %}
+        <option value="{{ time.time_id }}" {% if time.time_id == jogador.time_id %}selected{% endif %}>
+          {{ time.nome }} (ID: {{ time.time_id }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-success w-100">
+      <i class="fas fa-save"></i> Salvar Alterações
+    </button>
+  </form>
+</div>
+{% endblock %}

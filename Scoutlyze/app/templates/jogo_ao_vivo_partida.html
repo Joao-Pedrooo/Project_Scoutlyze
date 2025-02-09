@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}Jogo Ao Vivo{% endblock %}
+{% block content %}
+<!-- Bootstrap e estilos customizados -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .scoreboard { font-size: 0.9rem; }
+  .score { font-size: 1.8rem; font-weight: bold; }
+  .btn-action { font-size: 0.9rem; padding: 0.25rem; width: 100%; margin-bottom: 0.5rem; }
+  .action-column { border: 1px solid #ddd; padding: 1rem; }
+  .info-box { border: 1px solid #ccc; padding: 0.5rem; margin-top: 0.5rem; display: none; }
+</style>
+
+<div class="container-fluid my-4">
+  <!-- Placar -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body text-center scoreboard">
+      <div class="row">
+        <div class="col">
+          <p class="mb-0">{{ partida.time_casa.nome }}</p>
+          <p id="score_pro" class="score">{{ partida.placar_casa }}</p>
+        </div>
+        <div class="col">
+          <p class="mb-0">{{ partida.time_visitante.nome }}</p>
+          <p id="score_adv" class="score">{{ partida.placar_visitante }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem de feedback -->
+  {% if msg %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+
+  <!-- Layout das ações -->
+  <div class="row">
+    <!-- Coluna Ações PRÓ -->
+    <div class="col-md-6 action-column" id="colPro">
+      <h5 class="text-center text-success mb-3">Ações PRÓ</h5>
+
+      <!-- Grupo 1: Ofensivo -->
+      <div class="row mb-2">
+        {% set group1_pro = [
+          {"label": "Gol", "categoria": "finalizacao", "subtipo": "gol", "resultado": "gol"},
+          {"label": "Fin. Certas", "categoria": "finalizacao", "subtipo": "finalizacao_certa", "resultado": "finalizacao_certa"},
+          {"label": "Fin. Erradas", "categoria": "finalizacao", "subtipo": "finalizacao_errada", "resultado": "finalizacao_errada"}
+        ] %}
+        {% for item in group1_pro %}
+          <div class="col-4">
+            <button type="button" class="btn btn-success btn-action action-btn"
+                    data-event-type="{{ item.categoria }}"
+                    data-subtipo="{{ item.subtipo }}"
+                    data-resultado="{{ item.resultado }}"
+                    data-side="pro">
+              {{ item.label }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Grupo 2: Ofensivo 2 -->
+      <div class="row mb-2">
+        {% set group2_pro = ["Escanteios", "Assistências", "Faltas", "Passes"] %}
+        {% for acao in group2_pro %}
+          <div class="col-3">
+            <button type="button" class="btn btn-success btn-action action-btn"
+                    data-event-type="evento"
+                    data-side="pro"
+                    data-label="{{ acao }}">
+              {{ acao }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Grupo 3: Defensivo -->
+      <div class="row mb-2">
+        {% set group3_pro = ["Des. CP", "Des. SP", "Int. SP", "Int. CP"] %}
+        {% for acao in group3_pro %}
+          <div class="col-3">
+            <button type="button" class="btn btn-success btn-action action-btn"
+                    data-event-type="evento"
+                    data-side="pro"
+                    data-label="{{ acao }}">
+              {{ acao }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Seleção do jogador PRÓ -->
+      <div class="mb-2">
+        <label for="selectProPlayer" class="form-label">Jogador (PRÓ):</label>
+        <select class="form-select form-select-sm" id="selectProPlayer">
+          <option value="" disabled selected>Selecione</option>
+          {% for jogador in jogadores_pro|sort(attribute='numero_camisa') %}
+            <option value="{{ jogador.jogador_id }}">{{ jogador.numero_camisa }} - {{ jogador.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Caixa de informações adicionais PRÓ -->
+      <div id="proInfoBox" class="info-box"></div>
+    </div>
+
+    <!-- Coluna Ações ADV -->
+    <div class="col-md-6 action-column" id="colAdv">
+      <h5 class="text-center text-danger mb-3">Ações ADV</h5>
+
+      <!-- Grupo 1: Ofensivo -->
+      <div class="row mb-2">
+        {% set group1_adv = [
+          {"label": "Gols", "categoria": "finalizacao", "subtipo": "gol", "resultado": "gol"},
+          {"label": "Fin. Certas", "categoria": "finalizacao", "subtipo": "finalizacao_certa", "resultado": "finalizacao_certa"},
+          {"label": "Fin. Erradas", "categoria": "finalizacao", "subtipo": "finalizacao_errada", "resultado": "finalizacao_errada"},
+          {"label": "Escanteios", "categoria": "evento", "subtipo": "escanteios", "resultado": ""}
+        ] %}
+        {% for item in group1_adv %}
+          <div class="col-3">
+            <button type="button" class="btn btn-danger btn-action action-btn"
+                    data-event-type="{{ item.categoria }}"
+                    data-subtipo="{{ item.subtipo }}"
+                    data-resultado="{{ item.resultado }}"
+                    data-side="adv">
+              {{ item.label }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Grupo 2: Ofensivo 2 -->
+      <div class="row mb-2">
+        {% set group2_adv = ["Assistência", "Faltas"] %}
+        {% for acao in group2_adv %}
+          <div class="col-6">
+            <button type="button" class="btn btn-danger btn-action action-btn"
+                    data-event-type="evento"
+                    data-side="adv"
+                    data-label="{{ acao }}">
+              {{ acao }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Grupo 3: Defensivo -->
+      <div class="row mb-2">
+        {% set group3_adv = ["Des.CP", "Des. SP", "Int. CP", "Int. SP"] %}
+        {% for acao in group3_adv %}
+          <div class="col-3">
+            <button type="button" class="btn btn-danger btn-action action-btn"
+                    data-event-type="evento"
+                    data-side="adv"
+                    data-label="{{ acao }}">
+              {{ acao }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Seleção do jogador ADV -->
+      <div class="mb-2">
+        <label for="selectAdvPlayer" class="form-label">Jogador (ADV):</label>
+        <select class="form-select form-select-sm" id="selectAdvPlayer">
+          <option value="" disabled selected>Selecione</option>
+          {% for jogador in jogadores_adv|sort(attribute='numero_camisa') %}
+            <option value="{{ jogador.jogador_id }}">{{ jogador.numero_camisa }} - {{ jogador.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Caixa de informações adicionais ADV -->
+      <div id="advInfoBox" class="info-box"></div>
+    </div>
+  </div>
+
+  <!-- Botão para lançar evento -->
+  <div class="text-center my-4">
+    <button type="button" class="btn btn-primary btn-lg" id="launchEventBtn">Lançar Evento</button>
+  </div>
+
+  <!-- Tabela de Eventos Inseridos -->
+  <div class="mt-4">
+    <h6 class="text-center">Eventos Inseridos</h6>
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Jogador</th>
+          <th>Minuto/Período</th>
+          <th>Detalhes</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for evento in eventos %}
+        <tr>
+          <td>{{ evento.tipo_evento | title }}</td>
+          <td>{{ evento.jogador_id }}</td>
+          <td>
+            {% if evento.minuto_evento is defined and evento.periodo %}
+              {{ evento.minuto_evento }}/{{ evento.periodo }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>{{ evento.subtipo_evento }}</td>
+          <td>
+            <button type="button" class="btn btn-warning btn-sm edit-btn"
+                    data-evento-id="{{ evento.evento_id }}"
+                    data-jogador-id="{{ evento.jogador_id }}"
+                    data-tipo-evento="{{ evento.tipo_evento }}"
+                    data-subtipo-evento="{{ evento.subtipo_evento | default('') }}"
+                    data-minuto-evento="{{ evento.minuto_evento if evento.minuto_evento is defined else 0 }}"
+                    data-periodo="{{ evento.periodo }}">
+              Editar
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Formulário oculto para submeter evento -->
+<form id="submitEventForm" action="/api/jogo_ao_vivo/{{ partida.partida_id }}/evento" method="post" style="display: none;">
+  <input type="hidden" name="categoria_evento" id="hiddenCategoria">
+  <input type="hidden" name="jogador_id" id="hiddenJogador">
+  <input type="hidden" name="subtipo_evento" id="hiddenSubtipo" value="outro">
+  <input type="hidden" name="parte_corpo" id="hiddenParteCorpo" value="pe_direito">
+  <input type="hidden" name="zona_quadra" id="hiddenZonaQuadra">
+  <input type="hidden" name="zona_quadra_final" id="hiddenZonaQuadraFinal">
+  <input type="hidden" name="zona_goleira" id="hiddenZonaGoleira">
+  <input type="hidden" name="tipo_ataque" id="hiddenTipoAtaque">
+  <input type="hidden" name="resultado" id="hiddenResultado">
+  <input type="hidden" name="minuto_evento" id="hiddenMinuto">
+  <input type="hidden" name="periodo" id="hiddenPeriodo">
+  <input type="hidden" name="situacao_jogo" id="hiddenSituacao" value="regular">
+</form>
+
+<!-- JavaScript para manipulação dos eventos -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let activeSide = "";
+  let activeEventType = "";
+  let activeSubtipo = "";
+  let activeResultado = "";
+  let activePlayerId = "";
+
+  // Configura eventos de clique para os botões de ação
+  document.querySelectorAll(".action-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      activeSide = this.getAttribute("data-side");
+      activeEventType = this.getAttribute("data-event-type") || "evento";
+      activeSubtipo = this.getAttribute("data-subtipo") || "outro";
+      activeResultado = this.getAttribute("data-resultado") || "";
+
+      // Remove a classe "active" de todos os botões da coluna ativa
+      document.querySelectorAll(`#col${activeSide.charAt(0).toUpperCase() + activeSide.slice(1)} .action-btn`)
+              .forEach(b => b.classList.remove("active"));
+      this.classList.add("active");
+
+      // Exibe a caixa de informações adicionais para o lado selecionado
+      updateInfoBox(activeSide, activeEventType);
+    });
+  });
+
+  // Atualiza o activePlayerId ao selecionar um jogador
+  document.getElementById("selectProPlayer").addEventListener("change", function() {
+    activeSide = "pro";
+    activePlayerId = this.value;
+  });
+  document.getElementById("selectAdvPlayer").addEventListener("change", function() {
+    activeSide = "adv";
+    activePlayerId = this.value;
+  });
+
+  // Função que exibe os campos adicionais conforme o tipo de evento
+  function updateInfoBox(side, eventType) {
+    let container = (side === "pro") ? document.getElementById("proInfoBox") : document.getElementById("advInfoBox");
+    let html = `
+      <div class="mb-2">
+        <label class="form-label">Minuto (0-40)</label>
+        <input type="number" class="form-control form-control-sm" id="${side}_minuto" min="0" max="40" required>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Período</label>
+        <select class="form-select form-select-sm" id="${side}_periodo" required>
+          <option value="" disabled selected>Selecione</option>
+          <option value="1">1º Tempo</option>
+          <option value="2">2º Tempo</option>
+        </select>
+      </div>
+    `;
+    if (eventType === "finalizacao") {
+      html += `
+        <div class="mb-2">
+          <label class="form-label">Zona Quadra Origem (1-12)</label>
+          <input type="number" class="form-control form-control-sm" id="${side}_zona_origem" min="1" max="12" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Zona Goleira (1-16)</label>
+          <input type="number" class="form-control form-control-sm" id="${side}_zona_goleira" min="1" max="16" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Tipo de Ataque</label>
+          <select class="form-select form-select-sm" id="${side}_tipo_ataque" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="ataque_posicional">Ataque Posicional</option>
+            <option value="ataque_rapido">Ataque Rápido</option>
+            <option value="contra_ataque">Contra-Ataque</option>
+            <option value="lateral">Lateral</option>
+            <option value="falta">Falta</option>
+            <option value="tiro_livre">Tiro Livre</option>
+            <option value="penalti">Pênalti</option>
+            <option value="escanteio">Escanteio</option>
+            <option value="5x4">5x4</option>
+            <option value="goleiro_linha">Goleiro na Linha</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Resultado</label>
+          <select class="form-select form-select-sm" id="${side}_resultado" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="gol">Gol</option>
+            <option value="trave">Trave</option>
+            <option value="fora">Fora</option>
+            <option value="defesa_goleiro">Defesa do Goleiro</option>
+            <option value="bloqueado">Bloqueado</option>
+          </select>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="mb-2">
+          <label class="form-label">Observação</label>
+          <textarea class="form-control form-control-sm" id="${side}_observacao" rows="2"></textarea>
+        </div>
+      `;
+    }
+    container.innerHTML = html;
+    container.style.display = "block";
+  }
+
+  // Ao clicar no botão "Lançar Evento", coleta os dados e submete o formulário oculto
+  document.getElementById("launchEventBtn").addEventListener("click", function() {
+    if (!activeEventType) {
+      alert("Selecione uma ação.");
+      return;
+    }
+    if (!activePlayerId) {
+      alert("Selecione um jogador na coluna ativa.");
+      return;
+    }
+    // Preenche os inputs ocultos com os dados coletados
+    document.getElementById("hiddenCategoria").value = activeEventType;
+    document.getElementById("hiddenJogador").value = activePlayerId;
+    if (activeEventType === "finalizacao") {
+      document.getElementById("hiddenZonaQuadraFinal").value = document.getElementById(activeSide + "_zona_origem").value;
+      document.getElementById("hiddenZonaGoleira").value = document.getElementById(activeSide + "_zona_goleira").value;
+      document.getElementById("hiddenTipoAtaque").value = document.getElementById(activeSide + "_tipo_ataque").value;
+      document.getElementById("hiddenResultado").value = document.getElementById(activeSide + "_resultado").value;
+    } else {
+      document.getElementById("hiddenZonaQuadra").value = "ZQ0001";
+    }
+    let minInput = document.getElementById(activeSide + "_minuto");
+    let perSelect = document.getElementById(activeSide + "_periodo");
+    if (!minInput || !perSelect || !minInput.value || !perSelect.value) {
+      alert("Preencha os campos de Minuto e Período na caixa de informações adicionais.");
+      return;
+    }
+    document.getElementById("hiddenMinuto").value = minInput.value;
+    document.getElementById("hiddenPeriodo").value = perSelect.value;
+    document.getElementById("submitEventForm").submit();
+  });
+});
+</script>
+{% endblock %}

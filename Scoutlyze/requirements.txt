@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic[email]
+jinja2
+python-multipart

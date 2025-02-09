@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Jogo Ao Vivo - Painel{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h1 class="text-center">Painel - Jogos Ao Vivo</h1>
+  <form action="/api/jogo_ao_vivo/iniciar" method="post" class="mb-4">
+    <div class="mb-3">
+      <label for="partida_id" class="form-label">Selecione uma Partida</label>
+      <select id="partida_id" name="partida_id" class="form-select" required>
+        <option value="" disabled selected>Selecione uma partida</option>
+        {% for partida in partidas %}
+          <option value="{{ partida.partida_id }}">
+            {{ partida.time_casa.nome }} vs {{ partida.time_visitante.nome }} ({{ partida.campeonato }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">
+      <i class="fas fa-play"></i> Iniciar Jogo ao Vivo
+    </button>
+  </form>
+</div>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{% endblock %}

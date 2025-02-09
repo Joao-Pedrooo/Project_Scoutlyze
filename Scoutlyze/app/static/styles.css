@@ -1,0 +1,28 @@
+@media (max-width: 1080px) {
+    .facet_sidebar {
+      display: none;
+    }
+  }
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1em 0;
+    text-align: center;
+}
+
+header nav a {
+    color: #fff;
+    margin: 0 1em;
+    text-decoration: none;
+}
+
+main {
+    padding: 1em;
+}

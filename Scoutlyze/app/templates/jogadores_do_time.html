@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Jogadores do Time - {{ time.nome }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Jogadores do Time: {{ time.nome }}</h1>
+    <a href="/api/times/" class="btn btn-secondary mb-3">
+        <i class="fas fa-arrow-left"></i> Voltar para Times
+    </a>
+
+    <!-- Lista de Jogadores em Cards -->
+    <div class="row gy-4">
+        {% for jogador in jogadores %}
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="fas fa-user"></i> {{ jogador.nome }}
+                    </h5>
+                    <p class="card-text">
+                        <strong>ID:</strong> {{ jogador.jogador_id }}<br />
+                        <strong>Número:</strong> {{ jogador.numero }}<br />
+                        <strong>Posição:</strong> {{ jogador.posicao }}<br />
+                        <strong>Pé Dominante:</strong> {{ jogador.pe_dominante }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <p>Nenhum jogador cadastrado neste time.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Adicionando Font Awesome para ícones -->
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{% endblock %}
