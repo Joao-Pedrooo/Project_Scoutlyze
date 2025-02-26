@@ -4,14 +4,25 @@
 
 {% block content %}
 <div class="container mt-5">
+    <!-- Cabeçalho do formulário -->
     <h1 class="text-center">Cadastro de Times</h1>
 
-    <!-- Formulário de Cadastro -->
+    <!-- Formulário de Cadastro de Times -->
     <form action="/api/times/" method="post" class="mb-4">
+        <!-- Campo "Nome" do Time: utiliza um select fixo baseado no ENUM definido no modelo -->
         <div class="mb-3">
-            <label for="nome" class="form-label">Nome do Time</label>
-            <input type="text" id="nome" name="nome" class="form-control" required />
+            <label for="nome" class="form-label">Nome do Time </label>
+            <select id="nome" name="nome" class="form-select" required>
+                <option value="" disabled selected>Selecione um time...</option>
+                <option value="yeesco">Yeesco</option>
+                <option value="chapecoense">Chapecoense</option>
+                <option value="saudades">Saudades</option>
+                <option value="uruguaiana">Uruguaiana</option>
+                <option value="cacador">Cacador</option>
+            </select>
         </div>
+
+        <!-- Campo "Categoria": gera as opções dinamicamente a partir do objeto 'categorias' enviado pelo endpoint -->
         <div class="mb-3">
             <label for="categoria" class="form-label">Categoria</label>
             <select id="categoria" name="categoria" class="form-select" required>
@@ -20,25 +31,30 @@
                 {% endfor %}
             </select>
         </div>
+
+        <!-- Botão de submissão do formulário -->
         <button type="submit" class="btn btn-primary w-100">
             <i class="fas fa-plus-circle"></i> Cadastrar
         </button>
     </form>
 
-    <!-- Lista de Times em Cards -->
+    <!-- Lista de Times já cadastrados -->
     <h2 class="text-center mt-5">Times Cadastrados</h2>
     <div class="row gy-4">
         {% for time in times %}
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <!-- Exibe o nome do time (capitalizado) com um ícone -->
                     <h5 class="card-title text-primary">
-                        <i class="fas fa-users"></i> {{ time.nome }}
+                        <i class="fas fa-users"></i> {{ time.nome|capitalize }}
                     </h5>
+                    <!-- Exibe informações adicionais sobre o time -->
                     <p class="card-text">
                         <strong>Categoria:</strong> {{ time.categoria|capitalize }}<br />
                         <strong>ID:</strong> {{ time.time_id }}
                     </p>
+                    <!-- Botões para ações sobre o time: ver jogadores e excluir time -->
                     <div class="d-grid gap-2">
                         <a href="/api/times/{{ time.time_id }}/jogadores" class="btn btn-info btn-sm">
                             <i class="fas fa-users"></i> Ver Jogadores
@@ -51,6 +67,7 @@
             </div>
         </div>
         {% else %}
+        <!-- Mensagem exibida caso não existam times cadastrados -->
         <div class="col-12 text-center">
             <p>Nenhum time cadastrado.</p>
         </div>
@@ -58,13 +75,12 @@
     </div>
 </div>
 
+<!-- Script JavaScript para deletar um time via requisição fetch -->
 <script>
     async function deletarTime(timeId) {
         if (confirm("Tem certeza que deseja excluir este time?")) {
             try {
-                const response = await fetch(`/api/times/${timeId}`, {
-                    method: "DELETE",
-                });
+                const response = await fetch(`/api/times/${timeId}`, { method: "DELETE" });
                 if (response.ok) {
                     alert("Time deletado com sucesso!");
                     location.reload();
@@ -78,6 +94,6 @@
     }
 </script>
 
-<!-- Adicionando Font Awesome para ícones -->
+<!-- Inclusão do Font Awesome para exibir os ícones (substitua 'your-fontawesome-kit.js' pelo seu kit real) -->
 <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 {% endblock %}

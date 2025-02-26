@@ -1,22 +1,26 @@
-# Usar imagem Python oficial como base
+# Usa a imagem oficial Python 3.10 no modo "slim" (mais leve)
 FROM python:3.10-slim
 
-# Configuração do diretório de trabalho
+# Instala dependências do sistema, incluindo o cliente MySQL
+RUN apt-get update && \
+    apt-get install -y default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copiar os arquivos de dependências
+# Copia o arquivo de dependências para o container
 COPY requirements.txt .
 
-# Instalar as dependências
+# Atualiza pip e instala as dependências
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-
-RUN pip install --upgrade pip  --no-cache-dir -r requirements.txt
-
-# Copiar todo o código da aplicação para o container
+# Copia todo o código da aplicação para dentro do container
 COPY . .
 
-# Expor a porta para acesso à aplicação
+# Expondo a porta onde sua aplicação irá rodar
 EXPOSE 8003
 
-# Comando para iniciar o servidor FastAPI
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
+# Script de entrada (entrypoint) ou comando principal
+CMD ["./entrypoint.sh"]
