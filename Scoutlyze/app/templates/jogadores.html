@@ -3,128 +3,175 @@
 {% block title %}Cadastro de Jogadores{% endblock %}
 
 {% block content %}
-<!-- Estilos customizados para exibir 5 cards por linha em telas grandes -->
-<style>
-  @media (min-width: 992px) {
-    .col-5 {
-      flex: 0 0 20%;
-      max-width: 20%;
-    }
-  }
-  @media (min-width: 768px) and (max-width: 991.98px) {
-    .col-5 {
-      flex: 0 0 33.33%;
-      max-width: 33.33%;
-    }
-  }
-  @media (max-width: 767.98px) {
-    .col-5 {
-      flex: 0 0 50%;
-      max-width: 50%;
-    }
-  }
-  @media (max-width: 575.98px) {
-    .col-5 {
-      flex: 0 0 100%;
-      max-width: 100%;
-    }
-  }
-</style>
-
 <div class="container mt-5">
-  <!-- Formulário de Cadastro -->
-  <h1 id="formulario" class="text-center">Cadastro de Jogadores</h1>
-  <form action="/api/jogadores/" method="post" class="mb-4">
+  <!-- Título e Formulário de Cadastro -->
+  <h1 class="text-center mb-4">Cadastro de Jogadores</h1>
+  <form action="/api/jogadores/" method="post" class="mb-5">
+    <!-- Nome -->
     <div class="mb-3">
       <label for="nome" class="form-label">Nome do Jogador</label>
-      <input type="text" id="nome" name="nome" class="form-control" required />
+      <input type="text" id="nome" name="nome" class="form-control" required>
     </div>
+    <!-- Número da Camisa -->
     <div class="mb-3">
       <label for="numero" class="form-label">Número da Camisa</label>
-      <input type="number" id="numero" name="numero" class="form-control" required min="0" max="99" />
+      <input type="number" id="numero" name="numero" class="form-control" required min="0" max="99">
     </div>
+    <!-- Posição -->
     <div class="mb-3">
       <label for="posicao" class="form-label">Posição</label>
       <select id="posicao" name="posicao" class="form-select" required>
-        <option value="" disabled hidden selected>Selecione uma posição</option>
+        <option value="" disabled selected>Selecione uma posição</option>
         <option value="goleiro">Goleiro</option>
         <option value="fixo">Fixo</option>
         <option value="ala">Ala</option>
         <option value="pivo">Pivô</option>
       </select>
     </div>
+    <!-- Lateralidade -->
     <div class="mb-3">
       <label for="pe_dominante" class="form-label">Lateralidade</label>
       <select id="pe_dominante" name="pe_dominante" class="form-select" required>
-        <option value="" disabled hidden selected>Selecione a lateralidade</option>
+        <option value="" disabled selected>Selecione a lateralidade</option>
         <option value="direito">Direito</option>
         <option value="esquerdo">Esquerdo</option>
       </select>
     </div>
+    <!-- Time -->
     <div class="mb-3">
       <label for="time_id" class="form-label">Time</label>
-
       <select id="time_id" name="time_id" class="form-select" required>
-        <option value="" disabled hidden selected>Selecione um time</option>
+        <option value="" disabled selected>Selecione um time</option>
         {% for time in times %}
-        <option value="{{ time.time_id }}">{{ time.nome }} (ID: {{ time.time_id }})</option>
+          <option value="{{ time.time_id }}">{{ time.nome }} (ID: {{ time.time_id }})</option>
         {% endfor %}
       </select>
     </div>
+    <!-- Data de Nascimento -->
+    <div class="mb-3">
+      <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+      <input type="date" id="data_nascimento" name="data_nascimento" class="form-control">
+    </div>
+    <!-- Altura -->
+    <div class="mb-3">
+      <label for="altura" class="form-label">Altura (m)</label>
+      <!-- Usamos type="text" para poder aplicar formatação customizada -->
+      <input type="text" id="altura" name="altura" class="form-control"
+              oninput="autoCompleteDecimal(this, 2)" onblur="formatInput(this, 2)">
+    </div>
+    <!-- Peso -->
+    <div class="mb-3">
+      <label for="peso" class="form-label">Peso (kg)</label>
+      <input type="text" id="peso" name="peso" class="form-control"
+              oninput="autoCompleteDecimal2(this, 2)" onblur="formatInput(this, 2)">
+    </div>
+    <!-- Nacionalidade -->
+    <div class="mb-3">
+      <label for="nacionalidade" class="form-label">Nacionalidade</label>
+      <select id="nacionalidade" name="nacionalidade" class="form-select" required>
+        <option value="" disabled selected>Selecione uma nacionalidade</option>
+        <option value="Argentina">Argentina</option>
+        <option value="Bolívia">Bolívia</option>
+        <option value="Brasil">Brasil</option>
+        <option value="Chile">Chile</option>
+        <option value="Colômbia">Colômbia</option>
+        <option value="Equador">Equador</option>
+        <option value="Guiana">Guiana</option>
+        <option value="Paraguai">Paraguai</option>
+        <option value="Peru">Peru</option>
+        <option value="Suriname">Suriname</option>
+        <option value="Uruguai">Uruguai</option>
+        <option value="Venezuela">Venezuela</option>
+      </select>
+    </div>
+    <!-- Status -->
+    <div class="mb-3">
+      <label for="status" class="form-label">Status</label>
+      <select id="status" name="status" class="form-select" required>
+        <option value="" disabled selected>Selecione o status</option>
+        <option value="ativo">Ativo</option>
+        <option value="lesionado">Lesionado</option>
+        <option value="suspenso">Suspenso</option>
+        <option value="inativo">Inativo</option>
+      </select>
+    </div>
     <button type="submit" class="btn btn-primary w-100">
-      <i class="fas fa-plus-circle"></i> Cadastrar
+      <i class="fas fa-plus-circle"></i> Cadastrar Jogador
     </button>
   </form>
 
-  <!-- Lista de Jogadores Agrupados por Time -->
-  <h2 id="lista-jogadores" class="text-center mt-5">Jogadores Cadastrados</h2>
-  {% for time_id, jogadores_do_time in groups %}
-    {% set time_info = times|selectattr("time_id", "equalto", time_id)|first %}
-    <div class="mt-4">
-      <h3 class="text-secondary">
-        <i class="fas fa-users"></i> Time: {{ time_info.nome if time_info else "Sem Time" }}
-      </h3>
-      <div class="d-flex flex-wrap">
-        {% for jogador in jogadores_do_time %}
-        <div class="col-5 p-2">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title text-primary">{{ jogador.nome }}</h5>
-              <p class="card-text">
-                <strong>Nº da Camisa:</strong> {{ jogador.numero_camisa }}<br>
-                <strong>Posição:</strong> {{ jogador.posicao|capitalize }}
-              </p>
-            </div>
-            <div class="card-footer text-center">
-              <a href="/api/jogadores/editar/{{ jogador.jogador_id }}" class="btn btn-sm btn-warning me-1">Editar
-                <i class="fas fa-edit"></i>
-              </a>
-              <button class="btn btn-sm btn-danger" onclick="deletarJogador('{{ jogador.jogador_id }}')">Deletar
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
+  <!-- Listagem dos Jogadores Cadastrados -->
+  <h2 class="text-center">Jogadores Cadastrados</h2>
+  <div class="row">
+    {% for jogador in jogadores %}
+      <div class="col-md-4 col-12 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-primary">{{ jogador.nome }}</h5>
+            <p class="card-text">
+              <strong>Nº da Camisa:</strong> {{ jogador.numero_camisa if jogador.numero_camisa else "" }}<br>
+              <strong>Posição:</strong> {{ jogador.posicao|capitalize if jogador.posicao else "" }}<br>
+              <strong>Lateralidade:</strong> {{ jogador.pe_dominante|capitalize if jogador.pe_dominante else "" }}<br>
+              <strong>Time:</strong> {{ jogador.time_id if jogador.time_id else "" }}<br>
+              <strong>Nascimento:</strong> {{ jogador.data_nascimento if jogador.data_nascimento else "" }}<br>
+              <strong>Altura:</strong> {{ jogador.altura if jogador.altura and jogador.altura != 0 else "" }} m<br>
+              <strong>Peso:</strong> {{ jogador.peso if jogador.peso and jogador.peso != 0 else "" }} kg<br>
+              <strong>Nacionalidade:</strong> {{ jogador.nacionalidade if jogador.nacionalidade else "" }}<br>
+              <strong>Status:</strong> {{ jogador.status|capitalize if jogador.status else "" }}<br>
+              <strong>Tempo de Jogo:</strong> {{ jogador.tempo_jogo if jogador.tempo_jogo and jogador.tempo_jogo != 0 else "" }} min
+            </p>
+          </div>
+          <div class="card-footer text-center">
+            <a href="/api/jogadores/editar/{{ jogador.jogador_id }}" class="btn btn-sm btn-warning me-1">
+              Editar <i class="fas fa-edit"></i>
+            </a>
+            <button class="btn btn-sm btn-danger" onclick="deletarJogador('{{ jogador.jogador_id }}')">
+              Deletar <i class="fas fa-trash"></i>
+            </button>
           </div>
         </div>
-        {% endfor %}
       </div>
-    </div>
-  {% endfor %}
+    {% endfor %}
+  </div>
 </div>
 
 <script>
-  // Função para filtrar os times no dropdown de seleção
-  function filtrarTimes() {
-    var input = document.getElementById("time_search");
-    var filter = input.value.toLowerCase();
-    var select = document.getElementById("time_id");
-    var options = select.getElementsByTagName("option");
-    for (var i = 0; i < options.length; i++) {
-      var txtValue = options[i].textContent || options[i].innerText;
-      if (txtValue.toLowerCase().indexOf(filter) > -1) {
-        options[i].style.display = "";
-      } else {
-        options[i].style.display = "none";
-      }
+  /**
+   * Se o usuário digitar apenas um dígito sem ponto,
+   * adiciona automaticamente um ponto no final.
+   * Essa função é chamada no evento oninput dos campos.
+   *
+   * @param {HTMLInputElement} input - O elemento de input.
+   * @param {number} decimals - Número de casas decimais desejado (não usado diretamente aqui, mas para referência).
+   */
+  function autoCompleteDecimal(input, decimals) {
+    let val = input.value.trim();
+    // Se o valor contém somente dígitos e não possui ponto, e tem exatamente 1 dígito, adiciona o ponto
+    if(val && /^[0-9]+$/.test(val) && !val.includes('.') && val.length === 1) {
+      input.value = val + '.';
+    }
+  }
+  function autoCompleteDecimal2(input, decimals) {
+    let val = input.value.trim();
+    // Se o valor contém somente dígitos e não possui ponto, e tem exatamente 1 dígito, adiciona o ponto
+    if(val && /^[0-9]+$/.test(val) && !val.includes('.') && val.length === 2) {
+      input.value = val + '.';
+    }
+  }
+
+  /**
+   * Formata o valor do input para ter exatamente o número de casas decimais desejado.
+   * Essa função é chamada no evento onblur dos inputs.
+   *
+   * @param {HTMLInputElement} input - O elemento de input.
+   * @param {number} decimals - Número de casas decimais desejado.
+   */
+  function formatInput(input, decimals) {
+    let val = input.value.trim();
+    // Se o valor termina com um ponto, não formata imediatamente para permitir que o usuário complete
+    if(val.endsWith('.')) return;
+    if(val !== "" && !isNaN(val)) {
+      input.value = parseFloat(val).toFixed(decimals);
     }
   }
 
@@ -143,6 +190,15 @@
       }
     }
   }
+
+  // Para que a função de auto completar seja aplicada enquanto o usuário digita,
+  // podemos adicionar um listener "input" aos campos de Altura e Peso.
+  document.getElementById("altura")?.addEventListener("input", function() {
+    autoCompleteDecimal(this, 2);
+  });
+  document.getElementById("peso")?.addEventListener("input", function() {
+    autoCompleteDecimal2(this, 2);
+  });
 </script>
 
 <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>

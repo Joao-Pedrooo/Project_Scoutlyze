@@ -1,244 +1,160 @@
 {% extends "base.html" %}
 
-{% block title %}Partida{% endblock %}
+{% block title %}Cadastro de Partidas{% endblock %}
 
 {% block content %}
-<style>
-  /* Grid para 5 cards por linha em telas grandes */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1rem;
-  }
-  /* Ajustes responsivos */
-  @media (max-width: 1200px) {
-    .card-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  @media (max-width: 992px) {
-    .card-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  @media (max-width: 768px) {
-    .card-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  @media (max-width: 576px) {
-    .card-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .card-container {
-    width: 100%;
-  }
-  .placar {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-</style>
-
 <div class="container mt-5">
-  <!-- Formulário de Cadastro de Partida -->
-  <h1 class="text-center">Cadastro de Partidas</h1>
-  <form action="/api/partidas/" method="post" class="mb-4">
+  <h1 class="text-center mb-4">Cadastro de Partidas</h1>
+  <!-- Formulário de Cadastro de Partidas -->
+  <form action="/api/partidas/" method="post" class="mb-5">
     <div class="row">
+      <!-- Time Casa -->
       <div class="col-md-4 mb-3">
-        <label for="time_casa_id" class="form-label">Time Mandante</label>
+        <label for="time_casa_id" class="form-label">Time Casa</label>
         <select id="time_casa_id" name="time_casa_id" class="form-select" required>
-          <option value="" disabled hidden selected>Selecione um time</option>
+          <option value="" disabled selected>Selecione o time casa</option>
           {% for time in times %}
-          <option value="{{ time.time_id }}">{{ time.nome }}</option>
+            <option value="{{ time.time_id }}">{{ time.nome|capitalize }}</option>
           {% endfor %}
         </select>
       </div>
+      <!-- Time Visitante -->
       <div class="col-md-4 mb-3">
         <label for="time_visitante_id" class="form-label">Time Visitante</label>
         <select id="time_visitante_id" name="time_visitante_id" class="form-select" required>
-          <option value="" disabled hidden selected>Selecione um time</option>
+          <option value="" disabled selected>Selecione o time visitante</option>
           {% for time in times %}
-          <option value="{{ time.time_id }}">{{ time.nome }}</option>
+            <option value="{{ time.time_id }}">{{ time.nome|capitalize }}</option>
           {% endfor %}
         </select>
       </div>
+      <!-- Mando de Campo -->
       <div class="col-md-4 mb-3">
-        <label for="campeonato" class="form-label">Campeonato</label>
-        <select id="campeonato" name="campeonato" class="form-select" required>
-          <option value="" disabled hidden selected>Selecione o campeonato</option>
-          <option value="brasileiro">Brasileiro</option>
-          <option value="catarinense_ouro">Catarinense Ouro</option>
-          <option value="catarinense_prata">Catarinense Prata</option>
-          <option value="gaucho">Gaucho</option>
-          <option value="copa_sc">Copa SC</option>
-          <option value="copa_rs">Copa RS</option>
-          <option value="local_rs">Local RS</option>
+        <label for="mando_campo" class="form-label">Mando de Campo</label>
+        <select id="mando_campo" name="mando_campo" class="form-select" required>
+          <option value="" disabled selected>Selecione</option>
+          <option value="casa">Casa</option>
+          <option value="fora">Fora</option>
         </select>
       </div>
     </div>
-    <div class="mb-3">
-      <label for="fase_competicao" class="form-label">Fase da Competição</label>
-      <select id="fase_competicao" name="fase_competicao" class="form-select" required>
-        <option value="" disabled selected>Selecione a fase</option>
-        <option value="classificatorio">Classificatório</option>
-        <option value="eliminatorio">Eliminatório</option>
-      </select>
-    </div>
+
     <div class="row">
-      <div class="col-md-6 mb-3" id="div_dinamica">
-        <!-- Este div será atualizado via JavaScript com os campos "Rodada" e "Local da Partida" (para classificatório)
-             ou somente "Local da Partida" (para eliminatório) -->
-      </div>
+      <!-- Data/Hora -->
       <div class="col-md-6 mb-3">
-        <label for="data_partida" class="form-label">Data da Partida</label>
-        <input type="date" id="data_partida" name="data_partida" class="form-control" required>
+        <label for="data_hora" class="form-label">Data/Hora</label>
+        <input type="datetime-local" id="data_hora" name="data_hora" class="form-control" required>
+      </div>
+      <!-- Status da Partida -->
+      <div class="col-md-6 mb-3">
+        <label for="status_partida" class="form-label">Status</label>
+        <select id="status_partida" name="status_partida" class="form-select" required>
+          <option value="" disabled selected>Selecione o status</option>
+          <option value="agendada">Agendada</option>
+          <option value="em_andamento">Em Andamento</option>
+          <option value="finalizada">Finalizada</option>
+        </select>
       </div>
     </div>
-    <!-- Campo oculto para "periodo" (default 1) -->
-    <input type="hidden" name="periodo" value="1">
+
     <div class="row">
+      <!-- Campeonato -->
       <div class="col-md-6 mb-3">
-        <label for="placar_casa" class="form-label">Placar Mandante</label>
-        <input type="number" id="placar_casa" name="placar_casa" class="form-control" value="0" required>
+        <label for="campeonato" class="form-label">Campeonato</label>
+        <select id="campeonato" name="campeonato" class="form-select" required>
+          <option value="" disabled selected>Selecione o campeonato</option>
+          <option value="campeonato_brasileiro">Campeonato Brasileiro</option>
+          <option value="campeonato_catarinense_ouro">Catarinense Ouro</option>
+          <option value="campeonato_catarinense_prata">Catarinense Prata</option>
+          <option value="campeonato_gaucho">Campeonato Gaúcho</option>
+          <option value="copa_sc">Copa SC</option>
+          <option value="copa_rs">Copa RS</option>
+          <option value="copa_local_rs">Copa Local RS</option>
+        </select>
       </div>
+      <!-- Rodada -->
+      <div class="col-md-6 mb-3">
+        <label for="rodada" class="form-label">Rodada</label>
+        <input type="number" id="rodada" name="rodada" class="form-control" value="1" required min="1" max="21">
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Placar Casa -->
+      <div class="col-md-6 mb-3">
+        <label for="placar_casa" class="form-label">Placar Casa</label>
+        <input type="number" id="placar_casa" name="placar_casa" class="form-control" value="0" required min="0">
+      </div>
+      <!-- Placar Visitante -->
       <div class="col-md-6 mb-3">
         <label for="placar_visitante" class="form-label">Placar Visitante</label>
-        <input type="number" id="placar_visitante" name="placar_visitante" class="form-control" value="0" required>
+        <input type="number" id="placar_visitante" name="placar_visitante" class="form-control" value="0" required min="0">
       </div>
     </div>
+
+    <div class="row">
+      <!-- Período -->
+      <div class="col-md-6 mb-3">
+        <label for="periodo" class="form-label">Período</label>
+        <input type="number" id="periodo" name="periodo" class="form-control" value="1" required min="1" max="2">
+      </div>
+      <!-- Minuto da Ação -->
+      <div class="col-md-6 mb-3">
+        <label for="minuto_acao" class="form-label">Minuto da Ação</label>
+        <input type="number" id="minuto_acao" name="minuto_acao" class="form-control" min="0" max="40">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="local_jogo" class="form-label">Local do Jogo</label>
+      <input type="text" id="local_jogo" name="local_jogo" class="form-control">
+    </div>
+
     <button type="submit" class="btn btn-primary w-100">
       <i class="fas fa-plus-circle"></i> Cadastrar Partida
     </button>
   </form>
 
-  <!-- Listagem de Partidas agrupadas por Campeonato -->
-  <h2 class="text-center mt-5">Partidas Cadastradas</h2>
-  {% for campeonato, partidas_group in partidas|groupby('campeonato') %}
-    <h3 class="mt-4">{{ campeonato.replace('_', ' ') | title }}</h3>
-    <div class="card-grid">
-      {% for partida in partidas_group %}
-      <div class="card-container">
+  <!-- Lista de Partidas Cadastradas -->
+  <h2 class="text-center">Partidas Cadastradas</h2>
+  <div class="row">
+    {% for p in partidas %}
+      <div class="col-md-4 col-12 mb-3">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title text-primary">
-              {{ partida.time_casa.nome }} vs {{ partida.time_visitante.nome }}
+              {{ p.campeonato|replace("_", " ")|capitalize }} - Rodada {{ p.rodada }}
             </h5>
             <p class="card-text">
-              {% if partida.rodada and partida.rodada > 0 %}
-                <strong>Rodada:</strong> {{ partida.rodada }}
-              {% elif partida.local_partida %}
-                <strong>Local:</strong> {{ partida.local_partida }}
-              {% endif %}<br>
-              <strong>Placar:</strong> <span class="placar">{{ partida.placar_casa }} x {{ partida.placar_visitante }}</span><br>
-              <strong>Data:</strong> {{ partida.data_partida.strftime('%d/%m/%Y') }}
+              <strong>Time Casa:</strong> {{ p.time_casa_id }}<br>
+              <strong>Time Visitante:</strong> {{ p.time_visitante_id }}<br>
+              <strong>Mando:</strong> {{ p.mando_campo|capitalize }}<br>
+              <strong>Data/Hora:</strong> {{ p.data_hora }}<br>
+              <strong>Status:</strong> {{ p.status_partida|replace("_", " ")|capitalize }}<br>
+              <strong>Placar:</strong> {{ p.placar_casa }} x {{ p.placar_visitante }}<br>
+              <strong>Período:</strong> {{ p.periodo }}{% if p.minuto_acao %} - Min: {{ p.minuto_acao }}{% endif %}<br>
+              <strong>Local:</strong> {{ p.local_jogo or "" }}
             </p>
           </div>
           <div class="card-footer text-center">
-            <a href="/api/partidas/editar/{{ partida.partida_id }}" class="btn btn-sm btn-warning me-1">
-              <i class="fas fa-edit"></i> Editar
+            <a href="/api/partidas/editar/{{ p.partida_id }}" class="btn btn-sm btn-warning me-1">
+              Editar <i class="fas fa-edit"></i>
             </a>
-            <button class="btn btn-sm btn-danger" onclick="deletarPartida('{{ partida.partida_id }}')">
-              <i class="fas fa-trash"></i> Deletar
+            <button class="btn btn-sm btn-danger" onclick="deletarPartida('{{ p.partida_id }}')">
+              Deletar <i class="fas fa-trash"></i>
             </button>
           </div>
         </div>
       </div>
-      {% endfor %}
-    </div>
-  {% endfor %}
+    {% else %}
+      <div class="col-12 text-center">
+        <p>Nenhuma partida cadastrada.</p>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 
 <script>
-  // Função para atualizar os campos dinâmicos conforme a fase da competição
-  function atualizaTipoJogo(tipo) {
-    var divDinamica = document.getElementById("div_dinamica");
-    divDinamica.innerHTML = "";
-
-    if (tipo === "classificatorio") {
-      // Campo para Rodada
-      var labelRodada = document.createElement("label");
-      labelRodada.className = "form-label";
-      labelRodada.innerText = "Rodada";
-      var selectRodada = document.createElement("select");
-      selectRodada.className = "form-select";
-      selectRodada.name = "rodada";
-      selectRodada.required = true;
-      var placeholderRodada = document.createElement("option");
-      placeholderRodada.value = "";
-      placeholderRodada.disabled = true;
-      placeholderRodada.hidden = true;
-      placeholderRodada.selected = true;
-      placeholderRodada.innerText = "Selecione a rodada";
-      selectRodada.appendChild(placeholderRodada);
-      for (var i = 1; i <= 20; i++) {
-        var option = document.createElement("option");
-        option.value = i;
-        option.innerText = i;
-        selectRodada.appendChild(option);
-      }
-      divDinamica.appendChild(labelRodada);
-      divDinamica.appendChild(selectRodada);
-
-      // Campo para Local da Partida (Casa ou Fora)
-      var labelLocal = document.createElement("label");
-      labelLocal.className = "form-label mt-2";
-      labelLocal.innerText = "Local da Partida";
-      var selectLocal = document.createElement("select");
-      selectLocal.className = "form-select";
-      selectLocal.name = "local_partida";
-      selectLocal.required = true;
-      var placeholderLocal = document.createElement("option");
-      placeholderLocal.value = "";
-      placeholderLocal.disabled = true;
-      placeholderLocal.hidden = true;
-      placeholderLocal.selected = true;
-      placeholderLocal.innerText = "Selecione se é Casa ou Fora";
-      selectLocal.appendChild(placeholderLocal);
-      var optionCasa = document.createElement("option");
-      optionCasa.value = "Casa";
-      optionCasa.innerText = "Casa";
-      var optionFora = document.createElement("option");
-      optionFora.value = "Fora";
-      optionFora.innerText = "Fora";
-      selectLocal.appendChild(optionCasa);
-      selectLocal.appendChild(optionFora);
-      divDinamica.appendChild(labelLocal);
-      divDinamica.appendChild(selectLocal);
-
-    } else if (tipo === "eliminatorio") {
-      // Para eliminatório, exibe somente o campo de Local da Partida
-      var label = document.createElement("label");
-      label.className = "form-label";
-      label.innerText = "Local da Partida";
-      var select = document.createElement("select");
-      select.className = "form-select";
-      select.name = "local_partida";
-      select.required = true;
-      var placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.disabled = true;
-      placeholder.hidden = true;
-      placeholder.selected = true;
-      placeholder.innerText = "Selecione se é Casa ou Fora";
-      select.appendChild(placeholder);
-      var optionCasa = document.createElement("option");
-      optionCasa.value = "Casa";
-      optionCasa.innerText = "Casa";
-      var optionFora = document.createElement("option");
-      optionFora.value = "Fora";
-      optionFora.innerText = "Fora";
-      select.appendChild(optionCasa);
-      select.appendChild(optionFora);
-      divDinamica.appendChild(label);
-      divDinamica.appendChild(select);
-    }
-  }
-
-  document.getElementById("fase_competicao").addEventListener("change", function() {
-    atualizaTipoJogo(this.value);
-  });
-
   async function deletarPartida(partidaId) {
     if (confirm("Tem certeza que deseja excluir esta partida?")) {
       try {
@@ -255,4 +171,7 @@
     }
   }
 </script>
+
+<!-- Adiciona Font Awesome para ícones -->
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 {% endblock %}

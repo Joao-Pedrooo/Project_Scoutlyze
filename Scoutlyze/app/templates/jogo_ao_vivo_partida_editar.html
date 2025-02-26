@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Jogo Ao Vivo - Partida{% endblock %}
+{% block title %}Editar Partida Ao Vivo{% endblock %}
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
@@ -8,6 +8,7 @@
   .btn-action { font-size: 0.9rem; padding: 0.4rem; width: 100%; margin-bottom: 0.5rem; }
   .action-column { border: 1px solid #ddd; padding: 1rem; border-radius: 0.25rem; margin-bottom: 1rem; }
   .info-box { border: 1px solid #ccc; padding: 0.5rem; margin-top: 0.5rem; display: none; }
+  /* Estilo para as bolas dos jogadores */
   .player-ball {
     display: inline-block;
     width: 50px;
@@ -28,10 +29,10 @@
 </style>
 
 <div class="container-fluid my-4">
-  <!-- Placar da Partida -->
+  <!-- Informações da Partida -->
   <div class="card mb-4 shadow-sm">
     <div class="card-body text-center scoreboard">
-      <div class="row align-items-center">
+      <div class="row">
         <div class="col">
           <h5>{{ partida.time_casa.nome|title }}</h5>
           <p id="score_pro" class="score">{{ partida.placar_casa }}</p>
@@ -41,23 +42,25 @@
           <p id="score_adv" class="score">{{ partida.placar_visitante }}</p>
         </div>
       </div>
-      <p class="mb-0"><small>{{ partida.campeonato|replace("_", " ")|title }} - Rodada {{ partida.rodada }}</small></p>
+      <p class="mb-0"><small>{{ partida.campeonato|replace("_", " ")|title }} – Rodada {{ partida.rodada }}</small></p>
     </div>
   </div>
 
   {% if msg %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
       {{ msg }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
     </div>
   {% endif %}
 
   <!-- Área de ações para cada time -->
   <div class="row">
-    <!-- Time PRÓ (Casa) -->
+    <!-- Painel para o time da casa (PRÓ) -->
     <div class="col-md-6 action-column" id="colPro">
       <h5 class="text-center text-success mb-3">Ações {{ partida.time_casa.nome|title }}</h5>
-      {% set eventos = [
+      <!-- Botões de eventos -->
+      <div class="row mb-2">
+        {% set eventos = [
           {"label": "Gol", "categoria": "finalizacao", "tipo_evento": "gol"},
           {"label": "Fin. Certas", "categoria": "finalizacao", "tipo_evento": "finalizacoes_certas"},
           {"label": "Fin. Erradas", "categoria": "finalizacao", "tipo_evento": "finalizacoes_erradas"},
@@ -69,13 +72,8 @@
           {"label": "Desarme SP", "categoria": "evento", "tipo_evento": "desarme_sp"},
           {"label": "Interceptação CP", "categoria": "evento", "tipo_evento": "interceptacao_cp"},
           {"label": "Interceptação SP", "categoria": "evento", "tipo_evento": "interceptacao_sp"}
-      ] %}
-      {% set row1 = eventos[0:3] %}
-      {% set row2 = eventos[3:7] %}
-      {% set row3 = eventos[7:11] %}
-
-      <div class="row mb-2">
-        {% for item in row1 %}
+        ] %}
+        {% for item in eventos %}
           <div class="col-4 mb-2">
             <button type="button" class="btn btn-success btn-action action-btn"
                     data-event-category="{{ item.categoria }}"
@@ -86,31 +84,7 @@
           </div>
         {% endfor %}
       </div>
-      <div class="row mb-2">
-        {% for item in row2 %}
-          <div class="col-3 mb-2">
-            <button type="button" class="btn btn-success btn-action action-btn"
-                    data-event-category="{{ item.categoria }}"
-                    data-event-type="{{ item.tipo_evento }}"
-                    data-side="pro">
-              {{ item.label }}
-            </button>
-          </div>
-        {% endfor %}
-      </div>
-      <div class="row mb-2">
-        {% for item in row3 %}
-          <div class="col-3 mb-2">
-            <button type="button" class="btn btn-success btn-action action-btn"
-                    data-event-category="{{ item.categoria }}"
-                    data-event-type="{{ item.tipo_evento }}"
-                    data-side="pro">
-              {{ item.label }}
-            </button>
-          </div>
-        {% endfor %}
-      </div>
-
+      <!-- Seleção de jogador -->
       <div id="proPlayerSelection" class="mb-3" style="display:none;">
         <h6 class="text-center">Selecione o Jogador</h6>
         <div class="d-flex flex-wrap justify-content-center">
@@ -121,6 +95,7 @@
           {% endfor %}
         </div>
       </div>
+      <!-- Formulário do evento -->
       <div id="proEventForm" class="info-box" style="display:none;">
         <h6 class="text-center">Detalhes do Evento</h6>
         <div class="mb-2">
@@ -135,36 +110,10 @@
             <option value="2">2º Tempo</option>
           </select>
         </div>
-        <div id="proFinalizacaoExtras" style="display:none;">
-          <div class="mb-2">
-            <label class="form-label">Zona da Quadra (1-12)</label>
-            <input type="number" class="form-control form-control-sm" id="pro_zona_quadra" min="1" max="12">
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Zona da Goleira</label>
-            <input type="text" class="form-control form-control-sm" id="pro_zona_goleira" placeholder="Ex.: ZG0001">
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Tipo de Ataque</label>
-            <select class="form-select form-select-sm" id="pro_tipo_ataque">
-              <option value="" disabled selected>Selecione</option>
-              <option value="ataque_posicional">Ataque Posicional</option>
-              <option value="ataque_rapido">Ataque Rápido</option>
-              <option value="contra_ataque">Contra Ataque</option>
-              <option value="lateral">Lateral</option>
-              <option value="falta">Falta</option>
-              <option value="tiro_livre">Tiro Livre</option>
-              <option value="penalti">Penalti</option>
-              <option value="escanteio">Escanteio</option>
-              <option value="5x4">5x4</option>
-              <option value="goleiro_linha">Goleiro Linha</option>
-              <option value="gol_contra">Gol Contra</option>
-            </select>
-          </div>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="pro_rebote">
-            <label class="form-check-label" for="pro_rebote">Rebote</label>
-          </div>
+        <!-- Campo adicional para finalizações -->
+        <div id="proZonaContainer" class="mb-2" style="display:none;">
+          <label class="form-label">Zona da Quadra (1-12)</label>
+          <input type="number" class="form-control form-control-sm" id="pro_zona_quadra" min="1" max="12">
         </div>
         <div class="text-center">
           <button type="button" class="btn btn-primary btn-sm" id="proSubmitEvent">Confirmar Evento</button>
@@ -172,11 +121,12 @@
       </div>
     </div>
 
-    <!-- Time ADV (Visitante) -->
+    <!-- Painel para o time visitante (ADV) -->
     <div class="col-md-6 action-column" id="colAdv">
       <h5 class="text-center text-danger mb-3">Ações {{ partida.time_visitante.nome|title }}</h5>
+      <!-- Botões de eventos -->
       <div class="row mb-2">
-        {% for item in row1 %}
+        {% for item in eventos %}
           <div class="col-4 mb-2">
             <button type="button" class="btn btn-danger btn-action action-btn"
                     data-event-category="{{ item.categoria }}"
@@ -187,31 +137,7 @@
           </div>
         {% endfor %}
       </div>
-      <div class="row mb-2">
-        {% for item in row2 %}
-          <div class="col-3 mb-2">
-            <button type="button" class="btn btn-danger btn-action action-btn"
-                    data-event-category="{{ item.categoria }}"
-                    data-event-type="{{ item.tipo_evento }}"
-                    data-side="adv">
-              {{ item.label }}
-            </button>
-          </div>
-        {% endfor %}
-      </div>
-      <div class="row mb-2">
-        {% for item in row3 %}
-          <div class="col-3 mb-2">
-            <button type="button" class="btn btn-danger btn-action action-btn"
-                    data-event-category="{{ item.categoria }}"
-                    data-event-type="{{ item.tipo_evento }}"
-                    data-side="adv">
-              {{ item.label }}
-            </button>
-          </div>
-        {% endfor %}
-      </div>
-
+      <!-- Seleção de jogador -->
       <div id="advPlayerSelection" class="mb-3" style="display:none;">
         <h6 class="text-center">Selecione o Jogador</h6>
         <div class="d-flex flex-wrap justify-content-center">
@@ -222,6 +148,7 @@
           {% endfor %}
         </div>
       </div>
+      <!-- Formulário do evento -->
       <div id="advEventForm" class="info-box" style="display:none;">
         <h6 class="text-center">Detalhes do Evento</h6>
         <div class="mb-2">
@@ -236,36 +163,10 @@
             <option value="2">2º Tempo</option>
           </select>
         </div>
-        <div id="advFinalizacaoExtras" style="display:none;">
-          <div class="mb-2">
-            <label class="form-label">Zona da Quadra (1-12)</label>
-            <input type="number" class="form-control form-control-sm" id="adv_zona_quadra" min="1" max="12">
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Zona da Goleira</label>
-            <input type="text" class="form-control form-control-sm" id="adv_zona_goleira" placeholder="Ex.: ZG0001">
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Tipo de Ataque</label>
-            <select class="form-select form-select-sm" id="adv_tipo_ataque">
-              <option value="" disabled selected>Selecione</option>
-              <option value="ataque_posicional">Ataque Posicional</option>
-              <option value="ataque_rapido">Ataque Rápido</option>
-              <option value="contra_ataque">Contra Ataque</option>
-              <option value="lateral">Lateral</option>
-              <option value="falta">Falta</option>
-              <option value="tiro_livre">Tiro Livre</option>
-              <option value="penalti">Penalti</option>
-              <option value="escanteio">Escanteio</option>
-              <option value="5x4">5x4</option>
-              <option value="goleiro_linha">Goleiro Linha</option>
-              <option value="gol_contra">Gol Contra</option>
-            </select>
-          </div>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="adv_rebote">
-            <label class="form-check-label" for="adv_rebote">Rebote</label>
-          </div>
+        <!-- Campo adicional para finalizações -->
+        <div id="advZonaContainer" class="mb-2" style="display:none;">
+          <label class="form-label">Zona da Quadra (1-12)</label>
+          <input type="number" class="form-control form-control-sm" id="adv_zona_quadra" min="1" max="12">
         </div>
         <div class="text-center">
           <button type="button" class="btn btn-primary btn-sm" id="advSubmitEvent">Confirmar Evento</button>
@@ -277,14 +178,12 @@
   <!-- Tabela de Eventos Inseridos -->
   <div class="mt-4">
     <h6 class="text-center">Eventos Inseridos</h6>
-    <table class="table table-bordered table-sm" id="eventTable">
+    <table class="table table-bordered table-sm">
       <thead class="table-light">
         <tr>
           <th>Tipo</th>
           <th>Jogador</th>
           <th>Minuto/Período</th>
-          <th>Tipo de Ataque</th>
-          <th>Zona Goleira</th>
           <th>Ação</th>
         </tr>
       </thead>
@@ -299,20 +198,6 @@
             <td>
               {% if evento.minuto_evento is not none and evento.periodo is not none %}
                 {{ evento.minuto_evento }}' / {{ evento.periodo }}º
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>
-              {% if evento.tipo_evento == 'finalizacao' %}
-                {{ evento.tipo_ataque_id or '-' }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>
-              {% if evento.tipo_evento == 'finalizacao' %}
-                {{ evento.zona_goleira_id or '-' }}
               {% else %}
                 -
               {% endif %}
@@ -339,10 +224,6 @@
     <input type="hidden" name="tipo_evento" id="hiddenTipoEvento" value="">
     <input type="hidden" name="jogador_id" id="hiddenJogador" value="">
     <input type="hidden" name="zona_quadra" id="hiddenZonaQuadra" value="">
-    <input type="hidden" name="zona_quadra_final" id="hiddenZonaQuadraFinal" value="">
-    <input type="hidden" name="zona_goleira" id="hiddenZonaGoleira" value="">
-    <input type="hidden" name="tipo_ataque" id="hiddenTipoAtaque" value="">
-    <input type="hidden" name="rebote" id="hiddenRebote" value="">
     <input type="hidden" name="periodo" id="hiddenPeriodo" value="">
     <input type="hidden" name="minuto_evento" id="hiddenMinuto" value="">
   </form>
@@ -351,24 +232,23 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let activeSide = "";
-let activeCategory = "";   // "finalizacao" ou "evento"
-let activeTipoEvento = ""; // ex: "gol", "assistencias", etc.
+let activeCategory = "";
+let activeTipoEvento = "";
 let selectedPlayerId = "";
 
-// Limpa a seleção de jogadores
+// Limpa a seleção de jogadores (remove classe "selected")
 function clearPlayerSelection(side) {
-  let balls = side === "pro" ? document.querySelectorAll("#proPlayerSelection .player-ball") :
-                               document.querySelectorAll("#advPlayerSelection .player-ball");
-  balls.forEach(ball => ball.classList.remove("selected"));
+  const selector = side === "pro" ? "#proPlayerSelection .player-ball" : "#advPlayerSelection .player-ball";
+  document.querySelectorAll(selector).forEach(ball => ball.classList.remove("selected"));
 }
 
-// Ao clicar em botões de evento
+// Ao clicar nos botões de evento
 document.querySelectorAll(".action-btn").forEach(btn => {
   btn.addEventListener("click", function() {
     activeSide = this.getAttribute("data-side");
     activeCategory = this.getAttribute("data-event-category");
     activeTipoEvento = this.getAttribute("data-event-type");
-    console.log("activeCategory:", activeCategory, "activeTipoEvento:", activeTipoEvento);
+
     if(activeSide === "pro") {
       document.getElementById("proPlayerSelection").style.display = "block";
       document.getElementById("proEventForm").style.display = "none";
@@ -381,58 +261,42 @@ document.querySelectorAll(".action-btn").forEach(btn => {
   });
 });
 
-// Ao clicar em uma bola de jogador
+// Ao clicar na bola de jogador
 document.querySelectorAll(".player-ball").forEach(ball => {
   ball.addEventListener("click", function() {
-    let side = activeSide;
+    const side = activeSide;
     clearPlayerSelection(side);
     this.classList.add("selected");
     selectedPlayerId = this.getAttribute("data-player-id");
+
     if(side === "pro") {
       document.getElementById("proEventForm").style.display = "block";
-      document.getElementById("proFinalizacaoExtras").style.display = (activeCategory === "finalizacao") ? "block" : "none";
+      document.getElementById("proZonaContainer").style.display = (activeCategory === "finalizacao") ? "block" : "none";
     } else {
       document.getElementById("advEventForm").style.display = "block";
-      document.getElementById("advFinalizacaoExtras").style.display = (activeCategory === "finalizacao") ? "block" : "none";
+      document.getElementById("advZonaContainer").style.display = (activeCategory === "finalizacao") ? "block" : "none";
     }
   });
 });
 
-// Função para coletar e enviar os dados do evento
+// Função para validar e enviar o evento
 function submitEvent(side) {
-  let minutoField = document.getElementById(side + "_minuto");
-  let periodoField = document.getElementById(side + "_periodo");
-  if(!minutoField.value || !periodoField.value) {
+  const minutoField = document.getElementById(side + "_minuto");
+  const periodoField = document.getElementById(side + "_periodo");
+  if (!minutoField.value || !periodoField.value) {
     alert("Preencha o minuto e o período.");
     return;
   }
-  let minuto = minutoField.value;
-  let periodo = periodoField.value;
+  const minuto = minutoField.value;
+  const periodo = periodoField.value;
   let zona = "";
-  let zonaGoleira = "";
-  let tipoAtaque = "";
-  let rebote = false;
-  if(activeCategory === "finalizacao") {
-    let zonaField = document.getElementById(side + "_zona_quadra");
-    if(!zonaField.value) {
+  if (activeCategory === "finalizacao") {
+    const zonaField = document.getElementById(side + "_zona_quadra");
+    if (!zonaField.value) {
       alert("Informe a zona da quadra para a finalização.");
       return;
     }
     zona = zonaField.value;
-    let zonaGoleiraField = document.getElementById(side + "_zona_goleira");
-    if(!zonaGoleiraField.value) {
-      alert("Informe a zona da goleira para a finalização.");
-      return;
-    }
-    zonaGoleira = zonaGoleiraField.value;
-    let tipoAtaqueField = document.getElementById(side + "_tipo_ataque");
-    if(!tipoAtaqueField.value) {
-      alert("Selecione o tipo de ataque para a finalização.");
-      return;
-    }
-    tipoAtaque = tipoAtaqueField.value;
-    let reboteField = document.getElementById(side + "_rebote");
-    rebote = reboteField.checked;
   }
 
   document.getElementById("hiddenCategoria").value = activeCategory;
@@ -440,46 +304,11 @@ function submitEvent(side) {
   document.getElementById("hiddenJogador").value = selectedPlayerId;
   document.getElementById("hiddenMinuto").value = minuto;
   document.getElementById("hiddenPeriodo").value = periodo;
-  if(activeCategory === "finalizacao") {
-    document.getElementById("hiddenZonaQuadra").value = zona;
-    document.getElementById("hiddenZonaQuadraFinal").value = zona;
-    document.getElementById("hiddenZonaGoleira").value = zonaGoleira;
-    document.getElementById("hiddenTipoAtaque").value = tipoAtaque;
-    document.getElementById("hiddenRebote").value = rebote;
-  } else {
-    document.getElementById("hiddenZonaQuadra").value = "";
-    document.getElementById("hiddenZonaQuadraFinal").value = "";
-    document.getElementById("hiddenZonaGoleira").value = "";
-    document.getElementById("hiddenTipoAtaque").value = "";
-    document.getElementById("hiddenRebote").value = "";
-  }
-
-  // (Opcional) Adiciona uma linha na tabela de eventos
-  let tableBody = document.querySelector("#eventTable tbody");
-  let newRow = document.createElement("tr");
-  let cellTipo = document.createElement("td");
-  cellTipo.textContent = (activeCategory === "finalizacao") ? "Finalização" : activeCategory;
-  let cellJogador = document.createElement("td");
-  cellJogador.textContent = selectedPlayerId;
-  let cellMinPeriodo = document.createElement("td");
-  cellMinPeriodo.textContent = minuto + "' / " + periodo + "º";
-  let cellAtaque = document.createElement("td");
-  cellAtaque.textContent = (activeCategory === "finalizacao") ? tipoAtaque : "-";
-  let cellZonaGoleira = document.createElement("td");
-  cellZonaGoleira.textContent = (activeCategory === "finalizacao") ? zonaGoleira : "-";
-  let cellAcao = document.createElement("td");
-  cellAcao.innerHTML = '<button type="button" class="btn btn-warning btn-sm">Editar</button>';
-  newRow.appendChild(cellTipo);
-  newRow.appendChild(cellJogador);
-  newRow.appendChild(cellMinPeriodo);
-  newRow.appendChild(cellAtaque);
-  newRow.appendChild(cellZonaGoleira);
-  newRow.appendChild(cellAcao);
-  tableBody.prepend(newRow);
-
+  document.getElementById("hiddenZonaQuadra").value = zona;
   document.getElementById("submitEventForm").submit();
 }
 
+// Botões de confirmação do evento
 document.getElementById("proSubmitEvent").addEventListener("click", function() {
   submitEvent("pro");
 });

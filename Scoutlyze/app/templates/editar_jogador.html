@@ -4,46 +4,174 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h1 class="text-center">Editar Jogador</h1>
-  <form action="/api/jogadores/editar/{{ jogador.jogador_id }}" method="post" class="mb-4">
+  <h1 class="text-center mb-4">Editar Jogador</h1>
+  <form action="/api/jogadores/editar/{{ jogador.jogador_id }}" method="post" class="mb-5">
+    <!-- Nome -->
     <div class="mb-3">
       <label for="nome" class="form-label">Nome do Jogador</label>
-      <input type="text" id="nome" name="nome" class="form-control" value="{{ jogador.nome }}" required />
+      <input type="text" id="nome" name="nome" class="form-control" value="{{ jogador.nome }}" required>
     </div>
+    <!-- Número da Camisa -->
     <div class="mb-3">
       <label for="numero" class="form-label">Número da Camisa</label>
-      <!-- Converte para int para remover zeros à esquerda -->
-      <input type="number" id="numero" name="numero" class="form-control" value="{{ jogador.numero_camisa | int }}" required min="0" max="99" />
+      <input type="number" id="numero" name="numero" class="form-control" value="{{ jogador.numero_camisa | int }}" required min="0" max="99">
     </div>
+    <!-- Posição -->
     <div class="mb-3">
       <label for="posicao" class="form-label">Posição</label>
       <select id="posicao" name="posicao" class="form-select" required>
+        <option value="" disabled>Selecione uma posição</option>
         <option value="goleiro" {% if jogador.posicao == "goleiro" %}selected{% endif %}>Goleiro</option>
         <option value="fixo" {% if jogador.posicao == "fixo" %}selected{% endif %}>Fixo</option>
         <option value="ala" {% if jogador.posicao == "ala" %}selected{% endif %}>Ala</option>
         <option value="pivo" {% if jogador.posicao == "pivo" %}selected{% endif %}>Pivô</option>
       </select>
     </div>
+    <!-- Lateralidade -->
     <div class="mb-3">
-      <label for="pe_dominante" class="form-label">Pé Dominante</label>
+      <label for="pe_dominante" class="form-label">Lateralidade</label>
       <select id="pe_dominante" name="pe_dominante" class="form-select" required>
+        <option value="" disabled>Selecione a lateralidade</option>
         <option value="direito" {% if jogador.pe_dominante == "direito" %}selected{% endif %}>Direito</option>
         <option value="esquerdo" {% if jogador.pe_dominante == "esquerdo" %}selected{% endif %}>Esquerdo</option>
       </select>
     </div>
+    <!-- Time -->
     <div class="mb-3">
       <label for="time_id" class="form-label">Time</label>
       <select id="time_id" name="time_id" class="form-select" required>
         {% for time in times %}
-        <option value="{{ time.time_id }}" {% if time.time_id == jogador.time_id %}selected{% endif %}>
-          {{ time.nome }} (ID: {{ time.time_id }})
-        </option>
+          <option value="{{ time.time_id }}" {% if jogador.time_id == time.time_id %}selected{% endif %}>
+            {{ time.nome }}
+          </option>
         {% endfor %}
       </select>
     </div>
-    <button type="submit" class="btn btn-success w-100">
-      <i class="fas fa-save"></i> Salvar Alterações
-    </button>
+    <!-- Data de Nascimento -->
+    <div class="mb-3">
+      <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+      <input type="date" id="data_nascimento" name="data_nascimento" class="form-control" value="{{ jogador.data_nascimento }}">
+    </div>
+    <!-- Altura -->
+    <div class="mb-3">
+      <label for="altura" class="form-label">Altura (m)</label>
+      <!-- Usamos "text" para permitir a formatação via JS -->
+      <input type="text" id="altura" name="altura" class="form-control"
+             placeholder="ex: 1.70"
+             value="{{ jogador.altura }}"
+             oninput="autoCompleteAltura(this)" onblur="formatAltura(this)">
+    </div>
+    <!-- Peso -->
+    <div class="mb-3">
+      <label for="peso" class="form-label">Peso (kg)</label>
+      <input type="text" id="peso" name="peso" class="form-control"
+             placeholder="ex: 70.00"
+             value="{{ jogador.peso }}"
+             oninput="autoCompletePeso(this)" onblur="formatPeso(this)">
+    </div>
+    <!-- Nacionalidade -->
+    <div class="mb-3">
+      <label for="nacionalidade" class="form-label">Nacionalidade</label>
+      <select id="nacionalidade" name="nacionalidade" class="form-select" required>
+        <option value="" disabled {% if not jogador.nacionalidade %}selected{% endif %}>Selecione uma nacionalidade</option>
+        <option value="Argentina" {% if jogador.nacionalidade == "Argentina" %}selected{% endif %}>Argentina</option>
+        <option value="Bolívia" {% if jogador.nacionalidade == "Bolívia" %}selected{% endif %}>Bolívia</option>
+        <option value="Brasil" {% if jogador.nacionalidade == "Brasil" %}selected{% endif %}>Brasil</option>
+        <option value="Chile" {% if jogador.nacionalidade == "Chile" %}selected{% endif %}>Chile</option>
+        <option value="Colômbia" {% if jogador.nacionalidade == "Colômbia" %}selected{% endif %}>Colômbia</option>
+        <option value="Equador" {% if jogador.nacionalidade == "Equador" %}selected{% endif %}>Equador</option>
+        <option value="Guiana" {% if jogador.nacionalidade == "Guiana" %}selected{% endif %}>Guiana</option>
+        <option value="Paraguai" {% if jogador.nacionalidade == "Paraguai" %}selected{% endif %}>Paraguai</option>
+        <option value="Peru" {% if jogador.nacionalidade == "Peru" %}selected{% endif %}>Peru</option>
+        <option value="Suriname" {% if jogador.nacionalidade == "Suriname" %}selected{% endif %}>Suriname</option>
+        <option value="Uruguai" {% if jogador.nacionalidade == "Uruguai" %}selected{% endif %}>Uruguai</option>
+        <option value="Venezuela" {% if jogador.nacionalidade == "Venezuela" %}selected{% endif %}>Venezuela</option>
+      </select>
+    </div>
+    <!-- Status -->
+    <div class="mb-3">
+      <label for="status" class="form-label">Status</label>
+      <select id="status" name="status" class="form-select" required>
+        <option value="" disabled selected>Selecione o status</option>
+        <option value="ativo" {% if jogador.status == "ativo" %}selected{% endif %}>Ativo</option>
+        <option value="lesionado" {% if jogador.status == "lesionado" %}selected{% endif %}>Lesionado</option>
+        <option value="suspenso" {% if jogador.status == "suspenso" %}selected{% endif %}>Suspenso</option>
+        <option value="inativo" {% if jogador.status == "inativo" %}selected{% endif %}>Inativo</option>
+      </select>
+    </div>
+    <!-- Tempo de Jogo -->
+    <div class="mb-3">
+      <label for="tempo_jogo" class="form-label">Tempo de Jogo (min)</label>
+      <input type="number" id="tempo_jogo" name="tempo_jogo" class="form-control" value="{{ jogador.tempo_jogo }}">
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
   </form>
 </div>
+
+<script>
+  // Função para Altura:
+  function autoCompleteAltura(input) {
+    let val = input.value.trim();
+    // Se o valor for um único dígito sem ponto, adiciona o ponto
+    if(val.length === 1 && /^[0-9]$/.test(val) && !val.includes('.')) {
+      input.value = val + '.';
+    }
+  }
+  function formatAltura(input) {
+    let val = input.value.trim();
+    // Se terminar com ponto, não formata (permite a continuação)
+    if(val.endsWith('.')) return;
+    if(val !== "" && !isNaN(val)) {
+      input.value = parseFloat(val).toFixed(2);
+    }
+  }
+
+  // Função para Peso:
+  function autoCompletePeso(input) {
+    let val = input.value.trim();
+    // Se o valor for um único dígito sem ponto, adiciona o ponto
+    if(val.length === 1 && /^[0-9]$/.test(val) && !val.includes('.')) {
+      input.value = val + '.';
+    }
+  }
+  function formatPeso(input) {
+    let val = input.value.trim();
+    if(val.endsWith('.')) return;
+    if(val !== "" && !isNaN(val)) {
+      input.value = parseFloat(val).toFixed(2);
+    }
+  }
+
+  async function deletarJogador(jogadorId) {
+    if (confirm("Tem certeza que deseja excluir este jogador?")) {
+      try {
+        const response = await fetch(`/api/jogadores/${jogadorId}`, { method: "DELETE" });
+        if (response.ok) {
+          alert("Jogador deletado com sucesso!");
+          location.reload();
+        } else {
+          alert("Erro ao excluir o jogador.");
+        }
+      } catch (error) {
+        alert("Erro ao excluir o jogador: " + error.message);
+      }
+    }
+  }
+
+  // Adiciona listeners (opcional, pois os atributos oninput e onblur já estão definidos)
+  document.getElementById("altura")?.addEventListener("input", function() {
+    autoCompleteAltura(this);
+  });
+  document.getElementById("altura")?.addEventListener("blur", function() {
+    formatAltura(this);
+  });
+  document.getElementById("peso")?.addEventListener("input", function() {
+    autoCompletePeso(this);
+  });
+  document.getElementById("peso")?.addEventListener("blur", function() {
+    formatPeso(this);
+  });
+</script>
+
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 {% endblock %}
